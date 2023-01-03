@@ -20,7 +20,7 @@ However, the balanceboard's driver is now part of the Linux kernel; you can conn
 The weights being returned appear to be in kilograms.  
 
 ### Precision / Accuracy
-From what I can see, the data is not precise, but the grouped median was accurate when the weight is greater than 20 kg, for weights as little as 0.1 kg.
+From what I can see, the data is not precise, but the grouped median was accurate when the weight is greater than 20 kg, for weight changes as little as 0.1 kg.
 
 ## Helpful Sources
 
