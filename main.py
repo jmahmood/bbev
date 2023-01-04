@@ -10,40 +10,40 @@ TOP_LEFT_CODE = evdev.ecodes.ABS_HAT1X
 BOTTOM_LEFT_CODE = evdev.ecodes.ABS_HAT0Y
 BOTTOM_RIGHT_CODE = evdev.ecodes.ABS_HAT1Y
 
-
-TOP_LEFT = 'x1'
-TOP_RIGHT = 'x0'
-BOTTOM_LEFT = 'y1'
-BOTTOM_RIGHT = 'y0'
 SAMPLES_TO_USE = 10
 THRESHOLD = 0
 
 
 class WeightData(TypedDict):
-    x0: int
-    x1: int
-    y0: int
-    y1: int
+    TOP_LEFT: int
+    TOP_RIGHT: int
+    BOTTOM_LEFT: int
+    BOTTOM_RIGHT: int
 
 
-def total(input_data: WeightData):
-    return input_data[TOP_LEFT] + input_data[TOP_RIGHT] + input_data[BOTTOM_LEFT] + input_data[BOTTOM_RIGHT]
+class Response(TypedDict):
+    max: int
+    grouped_median: float
 
 
-def calculate_weight(device: evdev.InputDevice):
-    data: WeightData = {TOP_LEFT: 0, TOP_RIGHT: 0, BOTTOM_LEFT: 0, BOTTOM_RIGHT: 0}
+def total(input_data: WeightData) -> int:
+    return input_data['TOP_LEFT'] + input_data['TOP_RIGHT'] + input_data['BOTTOM_LEFT'] + input_data['BOTTOM_RIGHT']
+
+
+def calculate_weight(device: evdev.InputDevice) -> Response:
+    data: WeightData = {'TOP_LEFT': 0, 'TOP_RIGHT': 0, 'BOTTOM_LEFT': 0, 'BOTTOM_RIGHT': 0}
     max_weight = 0
     event_data: List[int] = []
 
     for event in device.read_loop():
         if event.code == TOP_RIGHT_CODE:
-            data[TOP_RIGHT] = event.value
+            data['TOP_RIGHT'] = event.value
         elif event.code == TOP_LEFT_CODE:
-            data[TOP_LEFT] = event.value
+            data['TOP_LEFT'] = event.value
         elif event.code == BOTTOM_LEFT_CODE:
-            data[BOTTOM_LEFT] = event.value
+            data['BOTTOM_LEFT'] = event.value
         elif event.code == BOTTOM_RIGHT_CODE:
-            data[BOTTOM_RIGHT] = event.value
+            data['BOTTOM_RIGHT'] = event.value
         elif event.code == evdev.ecodes.BTN_A:
             # This only happens when you are hitting the power button in the front
             pass
