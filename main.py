@@ -35,6 +35,9 @@ def calculate_weight(device: evdev.InputDevice):
             data[BOTTOM_RIGHT] = event.value
         elif event.code == evdev.ecodes.ABS_HAT1Y:
             data[BOTTOM_LEFT] = event.value
+        elif event.code == evdev.ecodes.BTN_A:
+            # This only happens when you are hitting the power button in the front
+            pass
         elif event.code == evdev.ecodes.SYN_REPORT and event.value == 3:
             pass
         elif event.code == evdev.ecodes.SYN_REPORT and event.value == 0:
@@ -51,7 +54,7 @@ def calculate_weight(device: evdev.InputDevice):
                 })
                 event_data = []
         else:
-            raise IOError(f'Unexpected event {str(event)}')
+            raise IOError(f'Unexpected event {evdev.categorize(event)}')
 
 
 if __name__ == '__main__':
