@@ -1,8 +1,15 @@
 import statistics
 from pprint import pprint
 import configparser
+from typing import TypedDict, List
 
 import evdev
+
+TOP_RIGHT_CODE = evdev.ecodes.ABS_HAT0X
+TOP_LEFT_CODE = evdev.ecodes.ABS_HAT1X
+BOTTOM_LEFT_CODE = evdev.ecodes.ABS_HAT0Y
+BOTTOM_RIGHT_CODE = evdev.ecodes.ABS_HAT1Y
+
 
 TOP_LEFT = 'x1'
 TOP_RIGHT = 'x0'
@@ -12,29 +19,31 @@ SAMPLES_TO_USE = 10
 THRESHOLD = 0
 
 
-def total(input_data):
+class WeightData(TypedDict):
+    x0: int
+    x1: int
+    y0: int
+    y1: int
+
+
+def total(input_data: WeightData):
     return input_data[TOP_LEFT] + input_data[TOP_RIGHT] + input_data[BOTTOM_LEFT] + input_data[BOTTOM_RIGHT]
 
 
 def calculate_weight(device: evdev.InputDevice):
-    data = {
-        "x1": 0,
-        "x0": 0,
-        "y1": 0,
-        "y0": 0,
-    }
+    data: WeightData = {TOP_LEFT: 0, TOP_RIGHT: 0, BOTTOM_LEFT: 0, BOTTOM_RIGHT: 0}
     max_weight = 0
-    event_data = []
+    event_data: List[int] = []
 
     for event in device.read_loop():
-        if event.code == evdev.ecodes.ABS_HAT0X:
+        if event.code == TOP_RIGHT_CODE:
             data[TOP_RIGHT] = event.value
-        elif event.code == evdev.ecodes.ABS_HAT1X:
+        elif event.code == TOP_LEFT_CODE:
             data[TOP_LEFT] = event.value
-        elif event.code == evdev.ecodes.ABS_HAT0Y:
-            data[BOTTOM_RIGHT] = event.value
-        elif event.code == evdev.ecodes.ABS_HAT1Y:
+        elif event.code == BOTTOM_LEFT_CODE:
             data[BOTTOM_LEFT] = event.value
+        elif event.code == BOTTOM_RIGHT_CODE:
+            data[BOTTOM_RIGHT] = event.value
         elif event.code == evdev.ecodes.BTN_A:
             # This only happens when you are hitting the power button in the front
             pass
@@ -48,11 +57,10 @@ def calculate_weight(device: evdev.InputDevice):
                 max_weight = running_total
 
             if running_total <= THRESHOLD:  # Someone stepped off the balance board.
-                pprint({
+                return {
                     'max': max_weight,
                     'grouped_median': statistics.median_grouped(event_data, SAMPLES_TO_USE)
-                })
-                event_data = []
+                }
         else:
             raise IOError(f'Unexpected event {evdev.categorize(event)}')
 
@@ -61,4 +69,4 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read('config.ini')
     balance_board: evdev.InputDevice = evdev.InputDevice(config['DEFAULT']['BalanceBoardDeviceLocation'])
-    calculate_weight(balance_board)
+    pprint(calculate_weight(balance_board))
