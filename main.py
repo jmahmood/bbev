@@ -10,9 +10,6 @@ TOP_LEFT_CODE = evdev.ecodes.ABS_HAT1X
 BOTTOM_LEFT_CODE = evdev.ecodes.ABS_HAT0Y
 BOTTOM_RIGHT_CODE = evdev.ecodes.ABS_HAT1Y
 
-SAMPLES_TO_USE = 10
-THRESHOLD = 0
-
 
 class WeightData(TypedDict):
     TOP_LEFT: int
@@ -30,7 +27,7 @@ def total(input_data: WeightData) -> int:
     return input_data['TOP_LEFT'] + input_data['TOP_RIGHT'] + input_data['BOTTOM_LEFT'] + input_data['BOTTOM_RIGHT']
 
 
-def calculate_weight(device: evdev.InputDevice) -> Response:
+def calculate_weight(device: evdev.InputDevice, threshold=0, samples_to_use=10) -> Response:
     data: WeightData = {'TOP_LEFT': 0, 'TOP_RIGHT': 0, 'BOTTOM_LEFT': 0, 'BOTTOM_RIGHT': 0}
     max_weight = 0
     event_data: List[int] = []
@@ -56,10 +53,10 @@ def calculate_weight(device: evdev.InputDevice) -> Response:
             if running_total > max_weight:
                 max_weight = running_total
 
-            if running_total <= THRESHOLD:  # Someone stepped off the balance board.
+            if running_total <= threshold:  # Someone stepped off the balance board.
                 return {
                     'max': max_weight,
-                    'grouped_median': statistics.median_grouped(event_data, SAMPLES_TO_USE)
+                    'grouped_median': statistics.median_grouped(event_data, samples_to_use)
                 }
         else:
             raise IOError(f'Unexpected event {evdev.categorize(event)}')
@@ -68,5 +65,11 @@ def calculate_weight(device: evdev.InputDevice) -> Response:
 if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read('config.ini')
-    balance_board: evdev.InputDevice = evdev.InputDevice(config['DEFAULT']['BalanceBoardDeviceLocation'])
-    pprint(calculate_weight(balance_board))
+    balance_board: evdev.InputDevice = evdev.InputDevice(
+        config['DEFAULT']['BalanceBoardDeviceLocation'],
+    )
+    pprint(calculate_weight(
+        balance_board,
+        int(config['DEFAULT']['Threshold']),
+        int(config['DEFAULT']['SamplesToUse']),
+    ))
