@@ -20,12 +20,12 @@ However, the balanceboard's driver is now part of the Linux kernel; you can conn
 The weights being returned appear to be in kilograms.  
 
 ### Precision / Accuracy
-From what I can see, the data is not precise, but the grouped median was accurate when the weight is greater than 20 kg, for weight changes as little as 0.1 kg.
+From what I can see, the data is not accurate, but the grouped median was precise when the weight is greater than 20 kg, for weight changes as little as 0.1 kg.
 
 ## Helpful Sources
 
-[Balance Board tech specs / The Wiibrew Wiki](http://wiibrew.org/wiki/Wii_Balance_Board)
-[Wiimote tech specs / The Wiibrew Wiki](http://wiibrew.org/wiki/Wiimote)
-[pyevdev Documentation](https://python-evdev.readthedocs.io/en/latest/index.html)
+- [Balance Board tech specs / The Wiibrew Wiki](http://wiibrew.org/wiki/Wii_Balance_Board)
+- [Wiimote tech specs / The Wiibrew Wiki](http://wiibrew.org/wiki/Wiimote)
+- [pyevdev Documentation](https://python-evdev.readthedocs.io/en/latest/index.html)
 
 :wave: Salaam
