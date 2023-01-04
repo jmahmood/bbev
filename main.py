@@ -29,6 +29,7 @@ def total(input_data: WeightData) -> int:
 
 def calculate_weight(device: evdev.InputDevice, threshold=0, samples_to_use=10) -> Response:
     data: WeightData = {'TOP_LEFT': 0, 'TOP_RIGHT': 0, 'BOTTOM_LEFT': 0, 'BOTTOM_RIGHT': 0}
+
     max_weight = 0
     event_data: List[int] = []
 
