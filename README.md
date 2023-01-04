@@ -2,7 +2,9 @@
 The Wii Balanceboard is extremely easy to access with Linux's evdev driver system!
 
 # How to Use
-There isn't much here right now.  Edit "BALANCE_BOARD_DEVICE_LOCATION" and run `python main.py` to start the process.  It will calculate your weight when you get on, and output something like this:
+Edit the config.ini file and add the correct location for "BALANCE_BOARD_DEVICE_LOCATION".
+
+After that, run `python main.py` to start the process.  It will calculate your weight when you get on, and output something like this:
 
 ```python3
 {'grouped_median': 1264.0, 'max': 1791}
