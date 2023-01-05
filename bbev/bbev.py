@@ -5,8 +5,8 @@ from typing import TypedDict, List
 
 import evdev
 
-TOP_RIGHT_CODE = evdev.ecodes.ABS_HAT0X
 TOP_LEFT_CODE = evdev.ecodes.ABS_HAT1X
+TOP_RIGHT_CODE = evdev.ecodes.ABS_HAT0X
 BOTTOM_LEFT_CODE = evdev.ecodes.ABS_HAT0Y
 BOTTOM_RIGHT_CODE = evdev.ecodes.ABS_HAT1Y
 
@@ -32,29 +32,39 @@ def calculate_weight(device: evdev.InputDevice, threshold=0, samples_to_use=10) 
 
     max_weight = 0
     event_data: List[int] = []
-
-    for event in device.read_loop():
-        if event.code == TOP_RIGHT_CODE:
-            data['TOP_RIGHT'] = event.value
+    while True:
+        event = device.read_one()
+        if event is None:
+            pass
         elif event.code == TOP_LEFT_CODE:
-            data['TOP_LEFT'] = event.value
+            data['TOP_LEFT'] = 0 if event.value < threshold else event.value
+        elif event.code == TOP_RIGHT_CODE:
+            data['TOP_RIGHT'] = 0 if event.value < threshold else event.value
         elif event.code == BOTTOM_LEFT_CODE:
-            data['BOTTOM_LEFT'] = event.value
+            data['BOTTOM_LEFT'] = 0 if event.value < threshold else event.value
         elif event.code == BOTTOM_RIGHT_CODE:
-            data['BOTTOM_RIGHT'] = event.value
+            data['BOTTOM_RIGHT'] = 0 if event.value < threshold else event.value
         elif event.code == evdev.ecodes.BTN_A:
             # This only happens when you are hitting the power button in the front
+            device.close()
+            return {
+                'max': 0,
+                'grouped_median': 0
+            }
+        elif event.code == evdev.ecodes.SYN_DROPPED:
             pass
         elif event.code == evdev.ecodes.SYN_REPORT and event.value == 3:
             pass
         elif event.code == evdev.ecodes.SYN_REPORT and event.value == 0:
             # We've gotten the full stream and can now calculate the outcome.
             running_total = total(data)
-            event_data.append(running_total)
+            if running_total > 0:
+                event_data.append(running_total)
             if running_total > max_weight:
                 max_weight = running_total
 
-            if running_total <= threshold:  # Someone stepped off the balance board.
+            if running_total <= threshold and max_weight > 0:  # Someone stepped off the balance board & we measured something.
+                device.close()
                 return {
                     'max': max_weight,
                     'grouped_median': statistics.median_grouped(event_data, samples_to_use)
