@@ -32,22 +32,24 @@ def calculate_weight(device: evdev.InputDevice, threshold=0, samples_to_use=10) 
 
     max_weight = 0
     event_data: List[int] = []
-
-    for event in device.read_loop():
-        if event.code == TOP_LEFT_CODE:
-            data['TOP_LEFT'] = 0 if event.value < 100 else event.value
+    while True:
+        event = device.read_one()
+        if event is None:
+            pass
+        elif event.code == TOP_LEFT_CODE:
+            data['TOP_LEFT'] = 0 if event.value < threshold else event.value
         elif event.code == TOP_RIGHT_CODE:
-            data['TOP_RIGHT'] = 0 if event.value < 100 else event.value
+            data['TOP_RIGHT'] = 0 if event.value < threshold else event.value
         elif event.code == BOTTOM_LEFT_CODE:
-            data['BOTTOM_LEFT'] = 0 if event.value < 100 else event.value
+            data['BOTTOM_LEFT'] = 0 if event.value < threshold else event.value
         elif event.code == BOTTOM_RIGHT_CODE:
-            data['BOTTOM_RIGHT'] = 0 if event.value < 100 else event.value
+            data['BOTTOM_RIGHT'] = 0 if event.value < threshold else event.value
         elif event.code == evdev.ecodes.BTN_A:
             # This only happens when you are hitting the power button in the front
             device.close()
             return {
-                    'max': 0,
-                    'grouped_median': 0
+                'max': 0,
+                'grouped_median': 0
             }
         elif event.code == evdev.ecodes.SYN_DROPPED:
             pass
@@ -62,6 +64,7 @@ def calculate_weight(device: evdev.InputDevice, threshold=0, samples_to_use=10) 
                 max_weight = running_total
 
             if running_total <= threshold and max_weight > 0:  # Someone stepped off the balance board & we measured something.
+                device.close()
                 return {
                     'max': max_weight,
                     'grouped_median': statistics.median_grouped(event_data, samples_to_use)
