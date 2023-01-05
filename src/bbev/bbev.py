@@ -5,8 +5,8 @@ from typing import TypedDict, List
 
 import evdev
 
-TOP_RIGHT_CODE = evdev.ecodes.ABS_HAT0X
 TOP_LEFT_CODE = evdev.ecodes.ABS_HAT1X
+TOP_RIGHT_CODE = evdev.ecodes.ABS_HAT0X
 BOTTOM_LEFT_CODE = evdev.ecodes.ABS_HAT0Y
 BOTTOM_RIGHT_CODE = evdev.ecodes.ABS_HAT1Y
 
@@ -34,10 +34,10 @@ def calculate_weight(device: evdev.InputDevice, threshold=0, samples_to_use=10) 
     event_data: List[int] = []
 
     for event in device.read_loop():
-        if event.code == TOP_RIGHT_CODE:
-            data['TOP_RIGHT'] = event.value
-        elif event.code == TOP_LEFT_CODE:
+        if event.code == TOP_LEFT_CODE:
             data['TOP_LEFT'] = event.value
+        elif event.code == TOP_RIGHT_CODE:
+            data['TOP_RIGHT'] = event.value
         elif event.code == BOTTOM_LEFT_CODE:
             data['BOTTOM_LEFT'] = event.value
         elif event.code == BOTTOM_RIGHT_CODE:

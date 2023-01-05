@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bbev_jmahmood"
+version = "0.0.1"
+authors = [
+  { name="Jawaad Mahmood", email="ideas@jawaadmahmood.com" },
+]
+description = " Using the Wii Balance Board with Linux's EVDev interface "
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: Linux",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/jmahmood/bbev"
