@@ -7,7 +7,7 @@ Edit the config.ini file and add the correct location for "BALANCE_BOARD_DEVICE_
 After that, run `python ./bbev/bbev.py` to start the process.  It will calculate your weight when you get on, and output something like this:
 
 ```
-{'grouped_median': 1264.0, 'max': 1791}
+{'grouped_median': 1264.0, 'max': 1791, 'samples': 1000}
 ```
 
 Alternatively, you can import this into your script.
