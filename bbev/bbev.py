@@ -21,6 +21,7 @@ class WeightData(TypedDict):
 class Response(TypedDict):
     max: int
     grouped_median: float
+    samples: int
 
 
 def total(input_data: WeightData) -> int:
@@ -49,7 +50,8 @@ def calculate_weight(device: evdev.InputDevice, threshold=0, samples_to_use=10) 
             device.close()
             return {
                 'max': 0,
-                'grouped_median': 0
+                'grouped_median': 0,
+                'samples': 0
             }
         elif event.code == evdev.ecodes.SYN_DROPPED:
             pass
@@ -63,11 +65,13 @@ def calculate_weight(device: evdev.InputDevice, threshold=0, samples_to_use=10) 
             if running_total > max_weight:
                 max_weight = running_total
 
-            if running_total <= threshold and max_weight > 0:  # Someone stepped off the balance board & we measured something.
+            if running_total <= threshold and max_weight > 0:
+                # Someone stepped off the balance board & we measured something.
                 device.close()
                 return {
                     'max': max_weight,
-                    'grouped_median': statistics.median_grouped(event_data, samples_to_use)
+                    'grouped_median': statistics.median_grouped(event_data, samples_to_use),
+                    'samples': len(event_data)
                 }
         else:
             raise IOError(f'Unexpected event {evdev.categorize(event)}')
