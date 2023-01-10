@@ -1,90 +1,45 @@
-import statistics
-from pprint import pprint
-import configparser
-from typing import TypedDict, List
+import logging
 
 import evdev
 
-TOP_LEFT_CODE = evdev.ecodes.ABS_HAT1X
-TOP_RIGHT_CODE = evdev.ecodes.ABS_HAT0X
-BOTTOM_LEFT_CODE = evdev.ecodes.ABS_HAT0Y
-BOTTOM_RIGHT_CODE = evdev.ecodes.ABS_HAT1Y
-
-
-class WeightData(TypedDict):
-    TOP_LEFT: int
-    TOP_RIGHT: int
-    BOTTOM_LEFT: int
-    BOTTOM_RIGHT: int
-
-
-class Response(TypedDict):
-    max: int
-    grouped_median: float
-    samples: int
-
-
-def total(input_data: WeightData) -> int:
-    return input_data['TOP_LEFT'] + input_data['TOP_RIGHT'] + input_data['BOTTOM_LEFT'] + input_data['BOTTOM_RIGHT']
-
-
-def calculate_weight(device: evdev.InputDevice, threshold=0, samples_to_use=10) -> Response:
-    data: WeightData = {'TOP_LEFT': 0, 'TOP_RIGHT': 0, 'BOTTOM_LEFT': 0, 'BOTTOM_RIGHT': 0}
-
-    max_weight = 0
-    event_data: List[int] = []
-    while True:
-        event = device.read_one()
-        if event is None:
-            pass
-        elif event.code == TOP_LEFT_CODE:
-            data['TOP_LEFT'] = 0 if event.value < threshold else event.value
-        elif event.code == TOP_RIGHT_CODE:
-            data['TOP_RIGHT'] = 0 if event.value < threshold else event.value
-        elif event.code == BOTTOM_LEFT_CODE:
-            data['BOTTOM_LEFT'] = 0 if event.value < threshold else event.value
-        elif event.code == BOTTOM_RIGHT_CODE:
-            data['BOTTOM_RIGHT'] = 0 if event.value < threshold else event.value
-        elif event.code == evdev.ecodes.BTN_A:
-            # This only happens when you are hitting the power button in the front
-            device.close()
-            return {
-                'max': 0,
-                'grouped_median': 0,
-                'samples': 0
-            }
-        elif event.code == evdev.ecodes.SYN_DROPPED:
-            pass
-        elif event.code == evdev.ecodes.SYN_REPORT and event.value == 3:
-            pass
-        elif event.code == evdev.ecodes.SYN_REPORT and event.value == 0:
-            # We've gotten the full stream and can now calculate the outcome.
-            running_total = total(data)
-            if running_total > 0:
-                event_data.append(running_total)
-            if running_total > max_weight:
-                max_weight = running_total
-
-            if running_total <= threshold and max_weight > 0:
-                # Someone stepped off the balance board & we measured something.
-                device.close()
-                return {
-                    'max': max_weight,
-                    'grouped_median': statistics.median_grouped(event_data, samples_to_use),
-                    'samples': len(event_data)
-                }
-        else:
-            raise IOError(f'Unexpected event {evdev.categorize(event)}')
-
+from bbdefault import calculate_weight
 
 if __name__ == '__main__':
-    config = configparser.ConfigParser()
-    config.read('config.ini')
+    logger = logging.getLogger(__name__)
+    handler = logging.StreamHandler()  # or RotatingFileHandler
+    handler.setFormatter(logging.Formatter('[%(asctime)s][%(name)s][%(levelname)s] %(message)s'))
+    logger.addHandler(handler)
+    logger.setLevel(logging.DEBUG)
+
+    devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+    device_path = (device.path for device in devices if device.name == 'Nintendo Wii Remote Balance Board').__next__()
     balance_board: evdev.InputDevice = evdev.InputDevice(
-        config['DEFAULT']['BalanceBoardDeviceLocation'],
+        device_path,
     )
-    pprint(calculate_weight(
+    print(calculate_weight(
         balance_board,
-        int(config['DEFAULT']['Threshold']),
-        int(config['DEFAULT']['SamplesToUse']),
+        100,
+        10,
+        logger
     ))
+    # trimmed_stats = responseData.trimmed_statistics(30)
+    # trimmed_samples = responseData.trimmed_samples(30)
+    # stats = responseData.statistics()
+    #
+    # print(trimmed_samples)
+    #
+    # print(f"""
+    # Trimmed Stats:
+    #     Mean: {trimmed_stats.mean}
+    #     Median: {trimmed_stats.median}
+    #     STDEV: {trimmed_stats.stdev}
+    #     Median_grouped: {statistics.median_grouped(trimmed_samples)}
+    #     Median: {statistics.median(trimmed_samples)}
+    #     Stdev: {statistics.stdev(trimmed_samples)}
+    #     Mean: {statistics.mean(trimmed_samples)}
+    #
+    # Untrimmed Stats:
+    #     Mean: {stats.mean}
+    #     Median: {stats.median}
+    #     STDEV: {stats.stdev}
+    # """)
