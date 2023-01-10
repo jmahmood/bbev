@@ -3,8 +3,8 @@ from typing import Optional
 
 import evdev
 
-from bbconstants import TOP_LEFT_CODE, TOP_RIGHT_CODE, BOTTOM_LEFT_CODE, BOTTOM_RIGHT_CODE
-from bbtypes import WeightData, total
+from .bbconstants import TOP_LEFT_CODE, TOP_RIGHT_CODE, BOTTOM_LEFT_CODE, BOTTOM_RIGHT_CODE
+from .bbtypes import WeightData, total
 
 CANCEL = -1
 

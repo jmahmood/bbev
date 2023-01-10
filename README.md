@@ -39,13 +39,13 @@ device_path = (device.path for device in devices if device.name == 'Nintendo Wii
 balance_board: evdev.InputDevice = evdev.InputDevice(
     device_path,
 )
-responseData = calculate_weight_with_statistics(
+weight_data = calculate_weight_with_statistics(
     balance_board,
     100,
 )
 
-stats = responseData.statistics()
-trimmed_stats = responseData.trimmed_statistics(30)
+stats = weight_data.statistics()
+trimmed_stats = weight_data.trimmed_statistics(30)
 
 print(f"""
 Stats:

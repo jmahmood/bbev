@@ -2,7 +2,7 @@ import logging
 
 import evdev
 
-from bbdefault import calculate_weight
+from .bbdefault import calculate_weight
 
 if __name__ == '__main__':
     logger = logging.getLogger(__name__)

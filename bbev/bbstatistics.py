@@ -4,8 +4,8 @@ from logging import Logger
 import evdev
 from typing import List, Optional
 
-from bbtypes import BasicStats
-from bbgenerator import balanceboard_generator, CANCEL
+from .bbtypes import BasicStats
+from .bbgenerator import balanceboard_generator, CANCEL
 
 
 class StatisticsResponse:
@@ -33,7 +33,7 @@ class StatisticsResponse:
     def normal_distribution(self):
         return self._normal_distribution
 
-    def trimmed_normal_distribution(self, removal_percentage: int) -> statistics.NormalDist:
+    def trimmed_normal_distribution(self, removal_percentage: int):
         samples = self.trimmed_samples(removal_percentage)
         return statistics.NormalDist.from_samples(samples)
 

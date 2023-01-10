@@ -4,8 +4,8 @@ from typing import List, Optional
 
 import evdev
 
-from bbgenerator import balanceboard_generator, CANCEL
-from bbtypes import DefaultResponse
+from .bbgenerator import balanceboard_generator, CANCEL
+from .bbtypes import DefaultResponse
 
 
 def calculate_weight(
